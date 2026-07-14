@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blood Donation Network — Project Presentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --surface:#FBFBFA;
+    --surface-soft:#F3F1EF;
+    --ink:#241F1D;
+    --ink-soft:#6B615D;
+    --line:#E6E1DC;
+
+    --rose:#A65B4E;
+    --rose-light:#C99089;
+    --gold:#C9A15A;
+    --maroon:#8B4A42;
+    --slate:#8CA3B0;
+
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+
+    --radius: 18px;
+    --ease: cubic-bezier(.22,.85,.32,1);
+  }
+
+  [data-theme="dark"]{
+    --bg:#181513;
+    --surface:#211C19;
+    --surface-soft:#2A2320;
+    --ink:#EEE8E4;
+    --ink-soft:#AB9F98;
+    --line:#3A322D;
+
+    --rose:#C97D6E;
+    --rose-light:#7A4A44;
+    --gold:#D9B876;
+    --maroon:#D99C8C;
+    --slate:#A8BDC9;
+  }
+
+  body, .demo-panel, .formula-card, .feature-cell, .unit-toggle, .rail button, .field label,
+  .category-row, header.top, .eq, .donor-card{
+    transition:background-color .5s var(--ease), color .5s var(--ease), border-color .5s var(--ease);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.6;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--rose-light); color:var(--ink);}
+
+  a{color:inherit;}
+  img,svg{display:block;max-width:100%;}
+
+  .wrap{
+    max-width:1080px;
+    margin:0 auto;
+    padding:0 32px;
+    position:relative;
+    z-index:1;
+  }
+
+  /* ---------- abstract decoration ---------- */
+  .abstract-layer{
+    position:absolute; inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:0;
+  }
+  .ring{
+    position:absolute;
+    border-radius:50%;
+    border:1px solid var(--line);
+  }
+  .ring.slow-spin{ animation:slow-spin 60s linear infinite; }
+  .ring.slow-spin-rev{ animation:slow-spin-rev 80s linear infinite; }
+  .ring.drift{ animation:drift 16s var(--ease) infinite; }
+  @keyframes slow-spin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  @keyframes slow-spin-rev{ from{transform:rotate(0deg);} to{transform:rotate(-360deg);} }
+  @keyframes drift{
+    0%,100%{ transform:translateY(0) translateX(0); }
+    50%{ transform:translateY(-18px) translateX(10px); }
+  }
+  .dot-arc{
+    position:absolute;
+    border-radius:50%;
+    border:1px dashed var(--line);
+  }
+
+  section{
+    position:relative;
+    padding:120px 0;
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  section:last-of-type{border-bottom:none;}
+
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:0.78rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--rose);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:22px;
+  }
+  .eyebrow::before{
+    content:'';
+    width:0;height:1px;
+    background:var(--rose);
+    display:inline-block;
+    transition:width .7s var(--ease) .25s;
+  }
+  .eyebrow.in::before{ width:26px; }
+  .hero .eyebrow::before{ width:26px; }
+
+  h1,h2,h3{
+    font-family:var(--font-display);
+    font-weight:700;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+  }
+  h2{
+    font-size:clamp(1.9rem, 3.4vw, 2.7rem);
+    margin-bottom:20px;
+  }
+  h3{
+    font-size:1.15rem;
+    margin-bottom:10px;
+  }
+  p{color:var(--ink-soft); max-width:640px;}
+  .lede{
+    font-size:1.08rem;
+    max-width:600px;
+  }
+
+  /* ---------- reveal on scroll ---------- */
+  .reveal{
+    opacity:0;
+    transform:translateY(28px);
+    transition:opacity .8s var(--ease), transform .8s var(--ease);
+  }
+  .reveal.in{opacity:1; transform:translateY(0);}
+  .reveal-stagger > *{
+    opacity:0; transform:translateY(20px);
+    transition:opacity .7s var(--ease), transform .7s var(--ease);
+  }
+  .reveal-stagger.in > *{opacity:1; transform:translateY(0);}
+  .reveal-stagger.in > *:nth-child(1){transition-delay:.05s;}
+  .reveal-stagger.in > *:nth-child(2){transition-delay:.14s;}
+  .reveal-stagger.in > *:nth-child(3){transition-delay:.23s;}
+  .reveal-stagger.in > *:nth-child(4){transition-delay:.32s;}
+  .reveal-stagger.in > *:nth-child(5){transition-delay:.41s;}
+  .reveal-stagger.in > *:nth-child(6){transition-delay:.5s;}
+  .reveal-stagger.in > *:nth-child(7){transition-delay:.59s;}
+  .reveal-stagger.in > *:nth-child(8){transition-delay:.68s;}
+
+  /* ---------- progress rail ---------- */
+  .rail{
+    position:fixed;
+    right:28px; top:50%;
+    transform:translateY(-50%);
+    display:flex; flex-direction:column; gap:14px;
+    z-index:50;
+  }
+  .rail button{
+    width:9px;height:9px;border-radius:50%;
+    background:transparent;
+    border:1.5px solid var(--ink-soft);
+    opacity:.45;
+    cursor:pointer;
+    transition:all .35s var(--ease);
+    padding:0;
+  }
+  .rail button.active{
+    background:var(--rose);
+    border-color:var(--rose);
+    opacity:1;
+    transform:scale(1.35);
+  }
+  @media (max-width: 860px){ .rail{display:none;} }
+
+  header.top{
+    position:fixed; top:0; left:0; right:0;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:20px 32px;
+    z-index:60;
+    font-family:var(--font-mono);
+    font-size:.75rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    pointer-events:none;
+  }
+  header.top span.dot{color:var(--rose);}
+
+  .theme-toggle{
+    pointer-events:auto;
+    position:relative;
+    width:34px; height:34px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--surface);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    color:var(--ink);
+    overflow:hidden;
+    transition:background .5s var(--ease), border-color .5s var(--ease), transform .3s var(--ease);
+  }
+  .theme-toggle:hover{ transform:rotate(18deg) scale(1.08); }
+  .theme-toggle:focus-visible{ outline:2px solid var(--rose); outline-offset:3px; }
+  .theme-toggle svg{ position:absolute; transition:opacity .5s var(--ease), transform .6s var(--ease); }
+  #iconSun{ opacity:1; transform:rotate(0deg) scale(1); }
+  #iconMoon{ opacity:0; transform:rotate(-60deg) scale(.5); }
+  [data-theme="dark"] #iconSun{ opacity:0; transform:rotate(60deg) scale(.5); }
+  [data-theme="dark"] #iconMoon{ opacity:1; transform:rotate(0deg) scale(1); }
+
+  /* ================= HERO ================= */
+  .hero{
+    min-height:100vh;
+    display:flex; flex-direction:column; justify-content:center;
+    padding-top:80px;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-top{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:40px;
+    margin-bottom:56px;
+  }
+  .hero h1{
+    font-size:clamp(2.6rem, 7vw, 5.1rem);
+    line-height:1.02;
+  }
+  .hero h1 .accent{color:var(--rose);}
+  .hero-sub{
+    font-size:1.1rem;
+    color:var(--ink-soft);
+    max-width:520px;
+    margin-top:24px;
+  }
+  .hero-meta{
+    font-family:var(--font-mono);
+    font-size:.8rem;
+    color:var(--ink-soft);
+    text-align:right;
+    line-height:1.9;
+    white-space:nowrap;
+  }
+
+  .pulse-block{ margin-top:20px; position:relative; display:flex; flex-direction:column; align-items:center; gap:14px; }
+  #heroPulse{ width:100%; max-width:460px; height:auto; }
+  #pulseLine{
+    stroke-dasharray:900;
+    stroke-dashoffset:900;
+    animation:draw-pulse 3.2s var(--ease) infinite;
+  }
+  @keyframes draw-pulse{
+    0%{ stroke-dashoffset:900; }
+    55%{ stroke-dashoffset:0; }
+    100%{ stroke-dashoffset:-900; }
+  }
+  .drop-icon{ animation:drop-pulse 1.8s var(--ease) infinite; transform-origin:center; }
+  @keyframes drop-pulse{
+    0%,100%{ transform:scale(1); }
+    45%{ transform:scale(1.12); }
+  }
+  .pulse-caption{
+    font-family:var(--font-mono); font-size:.78rem; color:var(--ink-soft);
+    letter-spacing:.06em; text-transform:uppercase;
+  }
+  .pulse-caption strong{ color:var(--rose); }
+
+  .particle-field{
+    position:absolute; inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:0;
+  }
+  .particle-field span{
+    position:absolute;
+    bottom:-20px;
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--rose-light);
+    opacity:.5;
+    animation:float-up linear infinite;
+  }
+  .particle-field span:nth-child(1){ left:6%; width:4px;height:4px; animation-duration:14s; animation-delay:0s; background:var(--rose);}
+  .particle-field span:nth-child(2){ left:18%; animation-duration:19s; animation-delay:2s; }
+  .particle-field span:nth-child(3){ left:32%; width:3px;height:3px; animation-duration:16s; animation-delay:5s; background:var(--gold);}
+  .particle-field span:nth-child(4){ left:47%; animation-duration:22s; animation-delay:1s; }
+  .particle-field span:nth-child(5){ left:61%; width:6px;height:6px; animation-duration:18s; animation-delay:6s; background:var(--rose-light);}
+  .particle-field span:nth-child(6){ left:74%; animation-duration:15s; animation-delay:3s; background:var(--maroon); opacity:.4;}
+  .particle-field span:nth-child(7){ left:85%; width:4px;height:4px; animation-duration:20s; animation-delay:8s; }
+  .particle-field span:nth-child(8){ left:93%; animation-duration:17s; animation-delay:4s; background:var(--gold);}
+  @keyframes float-up{
+    0%{ transform:translateY(0) translateX(0); opacity:0; }
+    10%{ opacity:.55; }
+    90%{ opacity:.4; }
+    100%{ transform:translateY(-540px) translateX(14px); opacity:0; }
+  }
+
+  .scroll-cue{
+    margin-top:56px;
+    display:flex; align-items:center; gap:12px;
+    font-family:var(--font-mono);
+    font-size:.75rem;
+    color:var(--ink-soft);
+    text-transform:uppercase; letter-spacing:.1em;
+  }
+  .scroll-cue .line{
+    width:1px; height:38px;
+    background:linear-gradient(var(--rose), transparent);
+    animation:pulse-down 1.8s var(--ease) infinite;
+  }
+  @keyframes pulse-down{
+    0%{transform:scaleY(0); transform-origin:top; opacity:0;}
+    40%{transform:scaleY(1); transform-origin:top; opacity:1;}
+    100%{transform:scaleY(1); transform-origin:bottom; opacity:0;}
+  }
+
+  /* ================= ABOUT ================= */
+  .about-grid{
+    display:grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap:64px;
+    align-items:start;
+  }
+  @media (max-width:860px){ .about-grid{grid-template-columns:1fr;} }
+
+  .formula-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:32px;
+  }
+  .criteria-list{ margin-top:18px; display:flex; flex-direction:column; gap:14px; }
+  .criteria-row{
+    display:flex; align-items:baseline; gap:12px;
+    font-size:.92rem;
+  }
+  .criteria-row::before{
+    content:'';
+    width:6px;height:6px;
+    border-radius:1px;
+    background:var(--rose);
+    flex-shrink:0;
+    transform:translateY(-2px);
+  }
+  .criteria-row strong{ color:var(--ink); font-weight:600; }
+
+  .category-list{margin-top:22px; display:flex; flex-direction:column; gap:0;}
+  .category-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 0;
+    border-top:1px solid var(--line);
+    font-family:var(--font-mono);
+    font-size:.82rem;
+    transition:padding-left .35s var(--ease);
+  }
+  .category-row:hover{ padding-left:8px; }
+  .category-row:last-child{border-bottom:1px solid var(--line);}
+  .swatch{width:10px;height:10px;border-radius:2px; display:inline-block; margin-right:10px; transition:transform .35s var(--ease);}
+  .category-row:hover .swatch{ transform:scale(1.5); }
+  .category-row .name{display:flex; align-items:center; color:var(--ink);}
+  .category-row .range{color:var(--ink-soft); text-align:right; max-width:220px;}
+
+  /* ================= WORKFLOW ================= */
+  .flow{ display:flex; flex-direction:column; gap:0; }
+  .flow-step{
+    display:grid;
+    grid-template-columns: 90px 1fr;
+    gap:28px;
+    padding:30px 0;
+    border-top:1px solid var(--line);
+    transition:padding-left .4s var(--ease);
+  }
+  .flow-step:last-child{border-bottom:1px solid var(--line);}
+  .flow-step:hover{ padding-left:10px; }
+  .flow-num{
+    font-family:var(--font-mono);
+    font-size:.85rem;
+    color:var(--rose);
+    padding-top:4px;
+    transition:transform .35s var(--ease), color .35s var(--ease);
+  }
+  .flow-step:hover .flow-num{ transform:scale(1.25); color:var(--maroon); }
+  .flow-body h3{margin-bottom:6px; transition:color .3s var(--ease);}
+  .flow-step:hover .flow-body h3{ color:var(--rose); }
+  .flow-body p{max-width:560px;}
+
+  /* ================= LIVE DEMO ================= */
+  .demo-tabs{
+    display:inline-flex;
+    align-items:center;
+    background:var(--surface-soft);
+    border:1px solid var(--line);
+    border-radius:100px;
+    padding:4px;
+    margin-bottom:36px;
+    position:relative;
+    font-family:var(--font-mono);
+    font-size:.78rem;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+  }
+  .demo-tabs button{
+    position:relative; z-index:2;
+    border:none; background:transparent;
+    padding:10px 22px;
+    border-radius:100px;
+    cursor:pointer;
+    color:var(--ink-soft);
+    transition:color .35s var(--ease);
+  }
+  .demo-tabs button.active{ color:var(--bg); }
+  .demo-tabs .thumb{
+    position:absolute; top:4px; left:4px;
+    height:calc(100% - 8px);
+    width:calc(50% - 4px);
+    background:var(--ink);
+    border-radius:100px;
+    transition:transform .4s var(--ease);
+    z-index:1;
+  }
+  .demo-tabs.browse .thumb{ transform:translateX(100%); }
+
+  .demo-panel{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:44px;
+  }
+  @media (max-width:860px){ .demo-panel{ padding:26px; } }
+
+  .demo-view{ display:none; }
+  .demo-view.active{ display:block; }
+
+  .form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px 24px;
+  }
+  @media (max-width:680px){ .form-grid{ grid-template-columns:1fr; } }
+  .form-grid .span-2{ grid-column:1 / -1; }
+
+  .field{ margin-bottom:0; }
+  .field label{
+    display:block;
+    font-family:var(--font-mono);
+    font-size:.75rem;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    margin-bottom:9px;
+  }
+  input[type=text], input[type=tel], input[type=number], select{
+    width:100%;
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:13px 14px;
+    font-family:var(--font-body);
+    font-size:.95rem;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .3s var(--ease), background .5s var(--ease);
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  select{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0 L5 6 L10 0' fill='none' stroke='%236B615D' stroke-width='1.4'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+    padding-right:36px;
+  }
+  input:focus, select:focus{ border-color:var(--rose); }
+  input::placeholder{ color:var(--ink-soft); opacity:.6; }
+
+  .calc-btn{
+    font-family:var(--font-mono);
+    font-size:.85rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    background:var(--ink);
+    color:var(--bg);
+    border:none;
+    padding:15px 26px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:background .3s var(--ease), transform .2s var(--ease);
+    width:100%;
+    margin-top:28px;
+  }
+  .calc-btn:hover{ background:var(--rose); }
+  .calc-btn:active{ transform:scale(.98); }
+  .calc-btn:focus-visible{ outline:2px solid var(--rose); outline-offset:3px; }
+  .calc-btn.ghost{
+    background:transparent;
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+    margin-top:14px;
+  }
+  .calc-btn.ghost:hover{ background:var(--surface-soft); color:var(--ink); }
+
+  .form-msg{
+    margin-top:18px;
+    font-size:.9rem;
+    color:var(--rose);
+    min-height:22px;
+    opacity:0;
+    transform:translateY(6px);
+    transition:opacity .5s var(--ease), transform .5s var(--ease);
+  }
+  .form-msg.show{ opacity:1; transform:translateY(0); }
+  .form-msg.success{ color:var(--rose); }
+
+  .privacy-note{
+    margin-top:18px;
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    color:var(--ink-soft);
+    display:flex; align-items:center; gap:8px;
+  }
+  .privacy-note .dot{width:6px;height:6px;border-radius:50%;background:var(--rose);}
+
+  /* browse view */
+  .browse-controls{
+    display:grid;
+    grid-template-columns:1fr 1fr auto;
+    gap:16px;
+    align-items:end;
+  }
+  @media (max-width:680px){ .browse-controls{ grid-template-columns:1fr; } }
+
+  .results-meta{
+    margin:26px 0 18px;
+    font-family:var(--font-mono);
+    font-size:.78rem;
+    color:var(--ink-soft);
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+  }
+  .results-meta .clear-link{
+    background:none; border:none; color:var(--ink-soft); text-decoration:underline;
+    cursor:pointer; font-family:var(--font-mono); font-size:.72rem;
+  }
+  .results-meta .clear-link:hover{ color:var(--rose); }
+
+  .donor-list{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:14px;
+  }
+  @media (max-width:680px){ .donor-list{ grid-template-columns:1fr; } }
+
+  .donor-card{
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px;
+    display:flex; flex-direction:column; gap:10px;
+    opacity:0; transform:translateY(14px);
+    animation:card-in .5s var(--ease) forwards;
+  }
+  @keyframes card-in{ to{ opacity:1; transform:translateY(0); } }
+  .donor-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .donor-name{ font-family:var(--font-display); font-weight:600; font-size:1.02rem; }
+  .blood-badge{
+    font-family:var(--font-mono);
+    font-size:.75rem;
+    font-weight:500;
+    padding:4px 10px;
+    border-radius:100px;
+    border:1px solid var(--line);
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .donor-loc{ font-size:.85rem; color:var(--ink-soft); }
+  .donor-bottom{ display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
+  .donor-phone{
+    font-family:var(--font-mono);
+    font-size:.85rem;
+    color:var(--rose);
+    text-decoration:none;
+    border-bottom:1px dashed var(--rose-light);
+  }
+  .sample-tag{
+    font-family:var(--font-mono);
+    font-size:.65rem;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    opacity:.7;
+  }
+
+  .empty-state{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--ink-soft);
+    font-size:.92rem;
+  }
+
+  /* ================= FEATURES ================= */
+  .feature-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  @media (max-width:860px){ .feature-grid{grid-template-columns:1fr;} }
+  .feature-cell{
+    background:var(--surface);
+    padding:32px 28px;
+    transition:background .3s var(--ease), transform .35s var(--ease);
+    position:relative;
+    overflow:hidden;
+  }
+  .feature-cell::before{
+    content:'';
+    position:absolute; left:0; top:0; bottom:0;
+    width:2px;
+    background:var(--rose);
+    transform:scaleY(0);
+    transform-origin:top;
+    transition:transform .4s var(--ease);
+  }
+  .feature-cell:hover{ background:var(--surface-soft); transform:translateY(-4px); }
+  .feature-cell:hover::before{ transform:scaleY(1); }
+  .feature-cell .mark{
+    font-family:var(--font-mono);
+    color:var(--rose);
+    font-size:.8rem;
+    margin-bottom:14px;
+    display:block;
+    transition:transform .35s var(--ease);
+  }
+  .feature-cell:hover .mark{ transform:translateX(4px); }
+  .feature-cell p{ font-size:.92rem; max-width:none; }
+
+  /* ================= FUTURE ================= */
+  .future-list{ display:flex; flex-direction:column; }
+  .future-row{
+    display:grid;
+    grid-template-columns:1fr 2.2fr;
+    gap:24px;
+    padding:26px 0;
+    border-top:1px solid var(--line);
+  }
+  .future-row:last-child{ border-bottom:1px solid var(--line); }
+  .future-row .tag{
+    font-family:var(--font-mono);
+    font-size:.78rem;
+    color:var(--maroon);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    padding-top:2px;
+  }
+  .future-row h3{ margin-bottom:6px; }
+
+  /* ================= CLOSING ================= */
+  .closing{ text-align:center; padding:140px 0 100px; }
+  .closing h2{ font-size:clamp(2rem,4.4vw,3.2rem); }
+  .closing p{ margin:0 auto; }
+  .closing .credit{
+    margin-top:48px;
+    font-family:var(--font-mono);
+    font-size:.8rem;
+    color:var(--ink-soft);
+    letter-spacing:.04em;
+  }
+  .closing .credit strong{ color:var(--ink); font-weight:500; }
+
+  /* ================= RESPONSIVE ================= */
+  @media (max-width:860px){
+    section{ padding:88px 0; }
+    .flow-step{ grid-template-columns:56px 1fr; gap:18px; }
+    .future-row{ grid-template-columns:1fr; gap:8px; }
+  }
+  @media (max-width:680px){
+    .wrap{ padding:0 22px; }
+    header.top{ padding:16px 20px; }
+    header.top span:first-child{ font-size:.68rem; }
+    .hero{ padding-top:64px; }
+    .hero-top{ flex-direction:column; gap:22px; margin-bottom:40px; }
+    .hero-meta{ text-align:left; white-space:normal; }
+    .hero-sub{ max-width:100%; }
+    .scroll-cue{ margin-top:44px; }
+    .closing{ padding:96px 0 72px; }
+  }
+  @media (max-width:440px){
+    section{ padding:72px 0; }
+    h2{ font-size:clamp(1.6rem, 8vw, 2.1rem); }
+    .flow-step{ grid-template-columns:1fr; gap:8px; }
+    .flow-num{ padding-top:0; }
+    .formula-card{ padding:24px; }
+    .demo-panel{ padding:20px; }
+    .feature-cell{ padding:26px 20px; }
+    .category-row{ font-size:.76rem; }
+    .ring, .dot-arc{ display:none; }
+    .particle-field{ display:none; }
+    .demo-tabs{ width:100%; }
+    .demo-tabs button{ flex:1; text-align:center; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+    html{ scroll-behavior:auto; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <span>Blood Donation Network <span class="dot">/</span> School Project</span>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" type="button">
+    <svg id="iconSun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="4.2"/>
+      <line x1="12" y1="1.5" x2="12" y2="4.2"/>
+      <line x1="12" y1="19.8" x2="12" y2="22.5"/>
+      <line x1="4.2" y1="4.2" x2="6.1" y2="6.1"/>
+      <line x1="17.9" y1="17.9" x2="19.8" y2="19.8"/>
+      <line x1="1.5" y1="12" x2="4.2" y2="12"/>
+      <line x1="19.8" y1="12" x2="22.5" y2="12"/>
+      <line x1="4.2" y1="19.8" x2="6.1" y2="17.9"/>
+      <line x1="17.9" y1="6.1" x2="19.8" y2="4.2"/>
+    </svg>
+    <svg id="iconMoon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5Z"/>
+    </svg>
+  </button>
+</header>
+
+<nav class="rail" id="rail"></nav>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="s-hero">
+  <div class="abstract-layer" aria-hidden="true">
+    <span class="ring slow-spin" style="width:420px;height:420px; right:-140px; top:-120px; border-color:var(--rose-light);"></span>
+    <span class="ring slow-spin-rev" style="width:260px;height:260px; right:-40px; top:60px;"></span>
+    <span class="dot-arc drift" style="width:180px;height:180px; left:-60px; bottom:40px; border-color:var(--gold);"></span>
+  </div>
+  <div class="wrap">
+    <div class="hero-top">
+      <div>
+        <div class="eyebrow">Academic Project — 2026</div>
+        <h1>Blood Donation<br><span class="accent">Network.</span></h1>
+        <p class="hero-sub">A single-page web platform that connects willing blood donors with people who need them — organised across Nepal's provinces, districts, and local levels, right down to the ward.</p>
+      </div>
+      <div class="hero-meta">
+        Softwarica College<br>
+        of IT &amp; E-Commerce<br>
+        Software Engineering<br>
+        Kathmandu, Nepal
+      </div>
+    </div>
+
+    <div class="pulse-block">
+      <div class="particle-field" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <svg id="heroPulse" viewBox="0 0 460 140" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 70 L120 70 L145 30 L170 110 L195 50 L215 70 L450 70" fill="none" stroke="var(--line)" stroke-width="2"/>
+        <path id="pulseLine" d="M10 70 L120 70 L145 30 L170 110 L195 50 L215 70 L450 70" fill="none" stroke="var(--rose)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <g class="drop-icon" transform="translate(215,70)">
+          <path d="M0 -16 C 9 -3, 12 6, 0 16 C -12 6, -9 -3, 0 -16 Z" fill="var(--rose)"/>
+        </g>
+      </svg>
+      <div class="pulse-caption">One donation can save up to <strong>three lives</strong></div>
+    </div>
+
+    <div class="scroll-cue"><span class="line"></span> Scroll to begin</div>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section id="s-about">
+  <div class="abstract-layer" aria-hidden="true">
+    <span class="ring slow-spin-rev" style="width:320px;height:320px; left:-160px; bottom:-160px; border-color:var(--rose-light);"></span>
+  </div>
+  <div class="wrap">
+    <div class="eyebrow reveal">What Is It</div>
+    <h2 class="reveal">Turning willingness into a searchable network.</h2>
+    <p class="lede reveal">Blood cannot be manufactured — it can only come from another person. Yet most willing donors and the people who need them never find each other in time. This platform closes that gap: a place to register as a donor and to search for one, organised by exactly where in Nepal you are.</p>
+
+    <div class="about-grid" style="margin-top:56px;">
+      <div class="formula-card reveal">
+        <h3>Who can donate</h3>
+        <p>General eligibility guidelines followed by most blood banks in Nepal.</p>
+        <div class="criteria-list">
+          <div class="criteria-row"><span><strong>Age 18–65</strong> years old</span></div>
+          <div class="criteria-row"><span><strong>Weight 50 kg</strong> or more</span></div>
+          <div class="criteria-row"><span><strong>Haemoglobin 12.5 g/dL</strong> or higher</span></div>
+          <div class="criteria-row"><span>At least <strong>90 days</strong> since the last donation</span></div>
+          <div class="criteria-row"><span>Generally in <strong>good health</strong>, free from infection</span></div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <h3 style="margin-bottom:14px;">Blood type compatibility</h3>
+        <div class="category-list">
+          <div class="category-row"><span class="name"><span class="swatch" style="background:var(--slate)"></span>O−</span><span class="range">Donates to all types</span></div>
+          <div class="category-row"><span class="name"><span class="swatch" style="background:var(--slate)"></span>O+</span><span class="range">O+, A+, B+, AB+</span></div>
+          <div class="category-row"><span class="name"><span class="swatch" style="background:var(--rose)"></span>A−</span><span class="range">A−, A+, AB−, AB+</span></div>
+          <div class="category-row"><span class="name"><span class="swatch" style="background:var(--rose)"></span>A+</span><span class="range">A+, AB+</span></div>
+          <div class="category-row"><span class="name"><span class="swatch" style="background:var(--gold)"></span>B−</span><span class="range">B−, B+, AB−, AB+</span></div>
+          <div class="category-row"><span class="name"><span class="swatch" style="background:var(--gold)"></span>B+</span><span class="range">B+, AB+</span></div>
+          <div class="category-row"><span class="name"><span class="swatch" style="background:var(--maroon)"></span>AB−</span><span class="range">AB−, AB+</span></div>
+          <div class="category-row"><span class="name"><span class="swatch" style="background:var(--maroon)"></span>AB+</span><span class="range">Receives from all types</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WORKFLOW ================= -->
+<section id="s-workflow">
+  <div class="abstract-layer" aria-hidden="true">
+    <span class="dot-arc drift" style="width:220px;height:220px; right:-80px; top:20%; border-color:var(--maroon);"></span>
+  </div>
+  <div class="wrap">
+    <div class="eyebrow reveal">How It Works</div>
+    <h2 class="reveal">Five steps, register to reach.</h2>
+    <p class="lede reveal">Every donor and every search on this platform passes through the same short pipeline.</p>
+
+    <div class="flow reveal-stagger" style="margin-top:48px;">
+      <div class="flow-step">
+        <div class="flow-num">01</div>
+        <div class="flow-body">
+          <h3>Register</h3>
+          <p>A donor fills in their name, phone number, blood group, and exact location — province, district, and local level, down to the ward.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">02</div>
+        <div class="flow-body">
+          <h3>Validate</h3>
+          <p>The form checks the phone number and blood group before anything is saved, so records stay clean and contactable.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">03</div>
+        <div class="flow-body">
+          <h3>Store locally</h3>
+          <p>Details are saved in the browser's own storage using the Web Storage API — no server, no account, no external database.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">04</div>
+        <div class="flow-body">
+          <h3>Filter and match</h3>
+          <p>Anyone in need searches the same list by province and blood type, and sees only donors who actually match.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">05</div>
+        <div class="flow-body">
+          <h3>Connect</h3>
+          <p>A tap on a donor's number opens the phone dialer directly — the platform's job ends the moment two people can talk.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LIVE DEMO ================= -->
+<section id="s-demo">
+  <div class="wrap">
+    <div class="eyebrow reveal">Live Demonstration</div>
+    <h2 class="reveal">Register a donor, or find one.</h2>
+    <p class="lede reveal">This is the actual tool. Add yourself as a donor, or switch to search and filter the list by province and blood type — everything runs and saves right here in your browser.</p>
+
+    <div class="demo-tabs reveal" id="demoTabs" style="margin-top:40px;">
+      <span class="thumb"></span>
+      <button type="button" class="active" data-view="register">Register</button>
+      <button type="button" data-view="browse">Find Donors</button>
+    </div>
+
+    <div class="demo-panel reveal">
+
+      <!-- REGISTER VIEW -->
+      <div class="demo-view active" id="viewRegister">
+        <div class="form-grid">
+          <div class="field">
+            <label for="donorName">Full name</label>
+            <input type="text" id="donorName" placeholder="e.g. Sudeep Pandit">
+          </div>
+          <div class="field">
+            <label for="donorPhone">Phone number</label>
+            <input type="tel" id="donorPhone" placeholder="98XXXXXXXX">
+          </div>
+          <div class="field">
+            <label for="donorBlood">Blood group</label>
+            <select id="donorBlood">
+              <option value="">Select blood group</option>
+              <option>A+</option><option>A−</option>
+              <option>B+</option><option>B−</option>
+              <option>AB+</option><option>AB−</option>
+              <option>O+</option><option>O−</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="donorProvince">Province</label>
+            <select id="donorProvince"><option value="">Select province</option></select>
+          </div>
+          <div class="field">
+            <label for="donorDistrict">District</label>
+            <select id="donorDistrict" disabled><option value="">Select province first</option></select>
+          </div>
+          <div class="field">
+            <label for="donorLocalType">Local level type</label>
+            <select id="donorLocalType">
+              <option value="">Select type</option>
+              <option>Metropolitan City</option>
+              <option>Sub-Metropolitan City</option>
+              <option>Municipality</option>
+              <option>Rural Municipality</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="donorLocalName">Municipality / Rural municipality name</label>
+            <input type="text" id="donorLocalName" placeholder="e.g. Kathmandu Metropolitan City">
+          </div>
+          <div class="field">
+            <label for="donorWard">Ward number <span style="opacity:.6;">(optional)</span></label>
+            <input type="number" id="donorWard" min="1" max="33" placeholder="e.g. 4">
+          </div>
+        </div>
+
+        <button class="calc-btn" id="registerBtn">Register as donor</button>
+        <div class="form-msg" id="registerMsg"></div>
+        <div class="privacy-note"><span class="dot"></span>Saved only in this browser using Web Storage — nothing is sent anywhere.</div>
+      </div>
+
+      <!-- BROWSE VIEW -->
+      <div class="demo-view" id="viewBrowse">
+        <div class="browse-controls">
+          <div class="field">
+            <label for="filterProvince">Province</label>
+            <select id="filterProvince"><option value="">All provinces</option></select>
+          </div>
+          <div class="field">
+            <label for="filterBlood">Blood group</label>
+            <select id="filterBlood">
+              <option value="">All blood groups</option>
+              <option>A+</option><option>A−</option>
+              <option>B+</option><option>B−</option>
+              <option>AB+</option><option>AB−</option>
+              <option>O+</option><option>O−</option>
+            </select>
+          </div>
+          <button class="calc-btn ghost" id="resetFilters" style="margin-top:0;">Reset</button>
+        </div>
+
+        <div class="results-meta">
+          <span id="resultsCount">Showing donors</span>
+          <button class="clear-link" id="clearMyData">Clear my registered data</button>
+        </div>
+
+        <div class="donor-list" id="donorList"></div>
+        <div class="empty-state" id="emptyState" style="display:none;">No donors match these filters yet — be the first to register from this area.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section id="s-features">
+  <div class="wrap">
+    <div class="eyebrow reveal">Key Highlights</div>
+    <h2 class="reveal">Built to be simple, local, and fast.</h2>
+
+    <div class="feature-grid reveal-stagger" style="margin-top:48px;">
+      <div class="feature-cell">
+        <span class="mark">Instant</span>
+        <h3>Real-time registration</h3>
+        <p>A donor is added to the list the moment the form is submitted — no waiting, no approval queue.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="mark">Nationwide</span>
+        <h3>Full administrative hierarchy</h3>
+        <p>Every donor is placed accurately by Nepal's 7 provinces, 77 districts, and local level type.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="mark">Targeted</span>
+        <h3>Province and blood-type search</h3>
+        <p>Filter the entire donor list down to exactly who's needed, in exactly the right area.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="mark">Private</span>
+        <h3>Nothing leaves the browser</h3>
+        <p>No account, no server, no third party — donor details stay stored locally on the device that entered them.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="mark">Direct</span>
+        <h3>One-tap calling</h3>
+        <p>Every donor's number is a live link that opens the phone dialer immediately.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="mark">Responsive</span>
+        <h3>Works on any screen</h3>
+        <p>From a classroom projector to a phone in someone's hand during an emergency.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TECHNOLOGIES ================= -->
+<section id="s-tech">
+  <div class="abstract-layer" aria-hidden="true">
+    <span class="dot-arc drift" style="width:200px;height:200px; left:-70px; top:15%; border-color:var(--rose-light);"></span>
+  </div>
+  <div class="wrap">
+    <div class="eyebrow reveal">Under The Hood</div>
+    <h2 class="reveal">Technologies used.</h2>
+    <p class="lede reveal">No frameworks, no build step, no dependencies to install — just the core web platform, used deliberately.</p>
+
+    <div class="feature-grid reveal-stagger" style="margin-top:48px;">
+      <div class="feature-cell">
+        <span class="mark">Markup</span>
+        <h3>HTML5</h3>
+        <p>Semantic, single-file structure that holds every section of this presentation and the donor tool itself.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="mark">Styling</span>
+        <h3>CSS3</h3>
+        <p>Custom properties, Grid and Flexbox, and keyframe animation drive the layout, the theme system, and the pulse-line motion.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="mark">Logic</span>
+        <h3>JavaScript (ES6)</h3>
+        <p>Vanilla JavaScript handles form validation, cascading province-district selects, filtering, and rendering — no library required.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="mark">Storage</span>
+        <h3>Web Storage API</h3>
+        <p>Donor records persist between visits using <span style="font-family:var(--font-mono);">localStorage</span>, entirely on the user's own device.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="mark">Typography</span>
+        <h3>Google Fonts</h3>
+        <p>Space Grotesk, Inter, and JetBrains Mono are loaded from the Google Fonts CDN for display, body, and data text.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="mark">Layout</span>
+        <h3>Responsive Design</h3>
+        <p>Fluid grids, clamp-based type, and three breakpoints keep the experience solid from a phone to a classroom projector.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FUTURE IMPROVEMENTS ================= -->
+<section id="s-future">
+  <div class="wrap">
+    <div class="eyebrow reveal">What's Next</div>
+    <h2 class="reveal">Where this project can grow.</h2>
+    <p class="lede reveal">A first version is deliberately small. These are the directions planned for future iterations.</p>
+
+    <div class="future-list reveal-stagger" style="margin-top:44px;">
+      <div class="future-row">
+        <div class="tag">Sync</div>
+        <div><h3>Cloud backend</h3><p>Move storage from the browser to a shared server so donor records aren't limited to one device.</p></div>
+      </div>
+      <div class="future-row">
+        <div class="tag">Trust</div>
+        <div><h3>Phone verification</h3><p>An SMS OTP step when registering, to confirm numbers are real and reduce false entries.</p></div>
+      </div>
+      <div class="future-row">
+        <div class="tag">Urgency</div>
+        <div><h3>Emergency broadcast</h3><p>Push an urgent request straight to matching donors nearby instead of waiting for someone to search.</p></div>
+      </div>
+      <div class="future-row">
+        <div class="tag">Integration</div>
+        <div><h3>Blood bank inventory</h3><p>Connect with local blood banks and hospitals to show live stock levels alongside individual donors.</p></div>
+      </div>
+      <div class="future-row">
+        <div class="tag">Reach</div>
+        <div><h3>Nepali language support</h3><p>A full Nepali-language interface so the platform is usable by a much wider audience.</p></div>
+      </div>
+      <div class="future-row">
+        <div class="tag">Care</div>
+        <div><h3>Donation history</h3><p>Track each donor's last donation date and gently remind them once they're eligible again.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CLOSING ================= -->
+<section id="s-closing">
+  <div class="abstract-layer" aria-hidden="true">
+    <span class="ring slow-spin" style="width:380px;height:380px; left:50%; top:50%; margin-left:-190px; margin-top:-190px; border-color:var(--rose-light);"></span>
+    <span class="ring slow-spin-rev" style="width:520px;height:520px; left:50%; top:50%; margin-left:-260px; margin-top:-260px;"></span>
+  </div>
+  <div class="wrap closing">
+    <div class="eyebrow reveal" style="justify-content:center;">Thank You</div>
+    <h2 class="reveal">Questions are welcome.</h2>
+    <p class="reveal" style="margin-left:auto;margin-right:auto;">Blood Donation Network was built to show that a genuinely useful public tool doesn't need a hospital's budget — just an accurate map of where people are, a clear form, and respect for how urgent this can be for someone.</p>
+    <div class="credit reveal">Presented by <strong>Sudeep Pandit</strong> · Software Engineering, Softwarica College of IT &amp; E-Commerce</div>
+  </div>
+</section>
+
+<script>
+// ---------- theme toggle ----------
+(function(){
+  const root = document.documentElement;
+  const saved = localStorage.getItem('bdn-theme');
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(saved === 'dark' || (!saved && prefersDark)){ root.setAttribute('data-theme', 'dark'); }
+  const btn = document.getElementById('themeToggle');
+  btn.addEventListener('click', ()=>{
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    if(isDark){ root.removeAttribute('data-theme'); localStorage.setItem('bdn-theme', 'light'); }
+    else{ root.setAttribute('data-theme', 'dark'); localStorage.setItem('bdn-theme', 'dark'); }
+  });
+})();
+
+// ---------- scroll reveal ----------
+const revealEls = document.querySelectorAll('.reveal, .reveal-stagger');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+}, {threshold:0.15});
+revealEls.forEach(el=>io.observe(el));
+
+// ---------- side rail nav ----------
+const sections = document.querySelectorAll('section[id]');
+const rail = document.getElementById('rail');
+sections.forEach(sec=>{
+  const b = document.createElement('button');
+  b.dataset.target = sec.id;
+  b.setAttribute('aria-label', sec.id.replace('s-',''));
+  b.addEventListener('click', ()=> sec.scrollIntoView({behavior:'smooth'}));
+  rail.appendChild(b);
+});
+const railBtns = rail.querySelectorAll('button');
+const railObs = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    const btn = rail.querySelector(`[data-target="${e.target.id}"]`);
+    if(e.isIntersecting){ railBtns.forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+  });
+}, {threshold:0.5});
+sections.forEach(s=>railObs.observe(s));
+
+// ================= NEPAL ADMINISTRATIVE DATA =================
+const PROVINCES = [
+  {name:'Koshi Province', districts:['Bhojpur','Dhankuta','Ilam','Jhapa','Khotang','Morang','Okhaldhunga','Panchthar','Sankhuwasabha','Solukhumbu','Sunsari','Taplejung','Terhathum','Udayapur']},
+  {name:'Madhesh Province', districts:['Bara','Dhanusa','Mahottari','Parsa','Rautahat','Saptari','Sarlahi','Siraha']},
+  {name:'Bagmati Province', districts:['Bhaktapur','Chitwan','Dhading','Dolakha','Kathmandu','Kavrepalanchok','Lalitpur','Makwanpur','Nuwakot','Ramechhap','Rasuwa','Sindhuli','Sindhupalchok']},
+  {name:'Gandaki Province', districts:['Baglung','Gorkha','Kaski','Lamjung','Manang','Mustang','Myagdi','Nawalparasi (East)','Parbat','Syangja','Tanahun']},
+  {name:'Lumbini Province', districts:['Arghakhanchi','Banke','Bardiya','Dang Deukhuri','Rukum (East)','Gulmi','Kapilvastu','Nawalparasi (West)','Palpa','Pyuthan','Rolpa','Rupandehi']},
+  {name:'Karnali Province', districts:['Dailekh','Dolpa','Humla','Jajarkot','Jumla','Kalikot','Mugu','Salyan','Surkhet','Rukum (West)']},
+  {name:'Sudurpashchim Province', districts:['Achham','Baitadi','Bajhang','Bajura','Dadeldhura','Darchula','Doti','Kailali','Kanchanpur']}
+];
+
+// Nepal's 77 districts -> local level type -> local level names (752 local levels)
+const LOCAL_LEVELS = {"Achham":{"Municipality":["Kamalbazar","Mangalsen","Panchadewal Binayak","Sanphebagar"],"Rural Municipality":["Bannigadhi Jayagadh","Chaurpati","Dhakari","Mellekh","Ramaroshan","Turmakhad"]},"Arghakhanchi":{"Municipality":["Bhumekasthan","Sandhikharka","Sitganga"],"Rural Municipality":["Chhatradev","Malarani","Panini"]},"Baglung":{"Municipality":["Baglung","Dhorpatan","Galkot","Jaimuni"],"Rural Municipality":["Badigad","Bareng","Kanthekhola","Nisikhola","Taman Khola","Tara Khola"]},"Baitadi":{"Municipality":["Dasharathchanda","Melauli","Patan","Purchaudi"],"Rural Municipality":["Dilasaini","Dogadakedar","Pancheshwar","Shivanath","Sigas","Surnaya"]},"Bajhang":{"Municipality":["Bungal","Jaya Prithivi"],"Rural Municipality":["Bithadchir","Chabispathivera","Durgathali","Kanda","Kedarseu","Khaptadchhanna","Masta","Surma","Talkot","Thalara"]},"Bajura":{"Municipality":["Badimalika","Budhiganga","Budhinanda","Tribeni"],"Rural Municipality":["Chhededaha","Gaumul","Himali","Pandav Gupha","Swami Kartik"]},"Banke":{"Municipality":["Kohalpur"],"Rural Municipality":["Baijanath","Duduwa","Janki","Khajura","Narainapur","Rapti Sonari"]},"Bara":{"Municipality":["Kolhabi","Mahagadhimai","Nijgadh","Pacharauta","Simroungadh"],"Rural Municipality":["Adarsh Kotwal","Baragadhi","Bishrampur","Devtal","Karaiyamai","Parwanipur","Pheta","Prasauni","Suwarna"],"Sub-Metropolitan City":["Kalaiya","Jitpur Simara"]},"Bardiya":{"Municipality":["Bansgadhi","Barbardiya","Gulariya","Madhuwan","Rajapur","Thakurbaba"],"Rural Municipality":["Badhaiyatal","Geruwa"]},"Bhaktapur":{"Municipality":["Bhaktapur","Changunarayan","Madhyapur Thimi","Suryabinayak"]},"Bhojpur":{"Municipality":["Bhojpur","Shadananda"],"Rural Municipality":["Aamchowk","Arun","Hatuwagadhi","Pauwadungma","Ramprasad Rai","Salpasilichho","Tyamkemaiyung"]},"Chitwan":{"Municipality":["Kalika","Khairahani","Madi","Rapti","Ratnangar"],"Rural Municipality":["Ichchhyakamana"],"Metropolitan City":["Bharatpur"]},"Dadeldhura":{"Municipality":["Amargadhi","Parashuram"],"Rural Municipality":["Ajaymeru","Alital","Bhageshwar","Ganayapdhura","Nawadurga"]},"Dailekh":{"Municipality":["Aathabis","Chamunda Bindrasaini","Dullu","Narayan"],"Rural Municipality":["Bhagawatimai","Bhairabi","Dungeshwor","Gurans","Mahabu","Naumule","Thantikandh"]},"Dang Deukhuri":{"Municipality":["Lamahi"],"Rural Municipality":["Babai","Banglachuli","Dangisharan","Gadhawa","Rajpur","Rapti","Shantinagar"],"Sub-Metropolitan City":["Ghorahi","Tulsipur"]},"Darchula":{"Municipality":["Mahakali","Shailyashikhar"],"Rural Municipality":["Apihimal","Byas","Dunhu","Lekam","Malikarjun","Marma","Naugad"]},"Dhading":{"Municipality":["Dhunibesi","Nilakantha"],"Rural Municipality":["Benighat Rorang","Gajuri","Galchi","Gangajamuna","Jwalamukhi","Khaniyabash","Netrawati","Rubi Valley","Siddhalek","Thakre","Tripurasundari"]},"Dhankuta":{"Municipality":["Dhankuta","Mahalaxmi","Pakhribas"],"Rural Municipality":["Chaubise","Chhathar Jorpati","Khalsa Chhintang Shahidbhumi","Sangurigadhi"]},"Dhanusa":{"Municipality":["Bidehi","Chhireshwornath","Dhanusadham","Ganeshman Charnath","Hansapur","Kamala","Mithila","Mithila Bihari","Nagarain","Sabaila","Sahidnagar"],"Rural Municipality":["Aurahi","Bateshwor","Dhanauji","Janaknandini","Lakshminiya","Mithila Bihari","Mukhiyapatti Musaharniya"],"Sub-Metropolitan City":["Janakpur"]},"Dolakha":{"Municipality":["Bhimeshwor","Jiri"],"Rural Municipality":["Baiteshwor","Bigu","Gaurishankar","Kalinchok","Melung","Sailung","Tamakoshi"]},"Dolpa":{"Municipality":["Thuli Bheri","Tripurasundari"],"Rural Municipality":["Chharka Tangsong","Dolpo Buddha","Jagadulla","Kaike","Mudkechula","Shey Phoksundo"]},"Doti":{"Municipality":["Dipayal Silgadhi","Shikhar"],"Rural Municipality":["Adharsha","Badikedar","Bogtan","Jorayal","K I Singh","Purbichauki","Sayal"]},"Gorkha":{"Municipality":["Gorkha","Palungtar"],"Rural Municipality":["Aarughat","Ajirkot","Bhimsen","Chum Nubri","Dharche","Gandaki","Sahid Lakhan","Siranchok","Sulikot"]},"Gulmi":{"Municipality":["Musikot","Resunga"],"Rural Municipality":["Chandrakot","Chatrakot","Dhurkot","Gulmidarbar","Isma","Kaligandaki","Madane","Malika","Ruru","Satyawati"]},"Humla":{"Rural Municipality":["Adanchuli","Chankheli","Kharpunath","Namkha","Sarkegad","Simkot","Tanjakot"]},"Ilam":{"Municipality":["Deumai","Ilam","Mai","Suryodaya"],"Rural Municipality":["Chulachuli","Fakphokthum","Maijogmai","Mangsebung","Rong","Sandakpur"]},"Jajarkot":{"Municipality":["Bheri","Chhedagad","Tribeni Nalagad"],"Rural Municipality":["Barekot","Junichande","Kuse","Shiwalaya"]},"Jhapa":{"Municipality":["Arjundhara","Bhadrapur","Birtamod","Damak","Gauradhaha","Kankai","Mechinagar","Shivasataxi"],"Rural Municipality":["Barhadashi","Buddhashanti","Gauriganj","Haldibari","Jhapa","Kachankawal","Kamal"]},"Jumla":{"Municipality":["Chandannath"],"Rural Municipality":["Guthichaur","Hima","Kanakasundari","Patrasi","Sinja","Tatopani","Tila"]},"Kavrepalanchok":{"Municipality":["Banepa","Dhulikhel","Mandandeupur","Namobuddha","Panauti","Panchkhal"],"Rural Municipality":["Bethanchowk","Bhumlu","Chaurideurali","Khanikhola","Mahabharat","Roshi","Temal"]},"Kailali":{"Municipality":["Bhajani","Gauriganga","Ghodaghodi","Godawari","Lamkichuha","Tikapur"],"Rural Municipality":["Bardagoriya","Chure","Janaki","Joshipur","Kailari","Mohanyal"],"Sub-Metropolitan City":["Dhangadhi"]},"Kalikot":{"Municipality":["Khandachakra","Raskot","Tilagufa"],"Rural Municipality":["Kalika","Mahawai","Naraharinath","Pachaljharana","Palata","Sanni Tribeni"]},"Kanchanpur":{"Municipality":["Bedkot","Belauri","Bhimdatta","Krishnapur","Mahakali","Punarbas","Suklaphanta"],"Rural Municipality":["Beldandi","Laljhandi"]},"Kapilvastu":{"Municipality":["Banganga","Buddhabhumi","Kapilbastu","Krishnanagar","Maharajgunj","Shivaraj"],"Rural Municipality":["Bijayanagar","Mayadevi","Suddhodhan","Yashodhara"]},"Kaski":{"Rural Municipality":["Annapurna","Machhapuchchhre","Madi","Rupa"],"Metropolitan City":["Pokhara"]},"Kathmandu":{"Municipality":["Budhanilakantha","Chandragiri","Dakshinkali","Gokarneshwor","Kageshwori Manahara","Kirtipur","Nagarjun","Shankharapur","Tarakeshwar","Tokha"],"Metropolitan City":["Kathmandu"]},"Khotang":{"Municipality":["Halesi Tuwachung","Rupakot Majhuwagadhi"],"Rural Municipality":["Ainselukhark","Barahapokhari","Diprung","Jantedhunga","Kepilasagadhi","Khotehang","Lamidanda","Sakela"]},"Lalitpur":{"Municipality":["Godawari","Mahalaxmi"],"Rural Municipality":["Bagmati","Konjyosom","Mahankal"],"Metropolitan City":["Lalitpur"]},"Lamjung":{"Municipality":["Besishahar","Madhyanepal","Rainas","Sundarbazar"],"Rural Municipality":["Dordi","Dudhpokhari","Kwholasothar","Marsyangdi"]},"Mahottari":{"Municipality":["Aurahi","Balwa","Bardibas","Bhangaha","Gaushala","Jaleswar","Loharpatti","Manra Sisawa","Matihani","Ramgopalpur"],"Rural Municipality":["Ekdanra","Mahottari","Pipra","Samsi","Sonama"]},"Makwanpur":{"Municipality":["Thaha"],"Rural Municipality":["Bagmati","Bakaiya","Bhimphedi","Indrasarowar","Kailash","Makawanpurgadhi","Manahari","Raksirang"]},"Manang":{"Rural Municipality":["Chame","Narphu","Nashong","Neshyang"]},"Morang":{"Municipality":["Belbari","Letang","Patahri Shanishchare","Rangeli","Ratuwamai","Sundarharaicha","Sunwarshi","Uralabari"],"Rural Municipality":["Budhiganga","Dhanpalthan","Gramthan","Jahada","Kanepokhari","Katahari","Kerabari","Miklajung"],"Metropolitan City":["Biratnagar"]},"Mugu":{"Municipality":["Chhayanath Rara"],"Rural Municipality":["Khatyad","Mugum Karmarong","Soru"]},"Mustang":{"Rural Municipality":["Barhagaun Muktikshetra","Dalome","Gharapjhong","Lomanthang","Thasang"]},"Myagdi":{"Municipality":["Beni"],"Rural Municipality":["Annapurna","Dhaulagiri","Malika","Mangala","Raghuganga"]},"Nawalparasi (East)":{"Municipality":["Devchuli","Gaidakot","Kawaswoti","Madhyabindu"],"Rural Municipality":["Binayee Triveni","Bulingtar","Bungdikali","Hupsekot"]},"Nawalparasi (West)":{"Municipality":["Bardaghat","Ramgram","Sunwal"],"Rural Municipality":["Palhi Nandan","Pratappur","Sarawal","Susta"]},"Nuwakot":{"Municipality":["Belkotgadhi","Bidur"],"Rural Municipality":["Dupcheshwar","Kakani","Kispang","Likhu","Meghang","Panchakanya","Shivapuri","Suryagadhi","Tadi","Tarkeshwar"]},"Okhaldhunga":{"Municipality":["Siddhicharan"],"Rural Municipality":["Champadevi","Chisankhugadhi","Khijidemba","Likhu","Manebhanjyang","Molung","Sunkoshi"]},"Palpa":{"Municipality":["Rampur","Tansen"],"Rural Municipality":["Bagnaskali","Mathagadhi","Nisdi","Purbakhola","Rainadevi Chhahara","Rambha","Ribdikot","Tinau"]},"Panchthar":{"Municipality":["Phidim"],"Rural Municipality":["Falelung","Falgunanda","Hilihang","Kummayak","Miklajung","Tumbewa","Yangwarak"]},"Parsa":{"Municipality":["Bahudaramai","Parsagadi","Pokhariya"],"Rural Municipality":["Bindabasini","Chhipaharmai","Dhobini","Jagarnathpur","Jira Bhawani","Kalikamai","Pakahamainpur","Paterwasugauli","Sakhuwa Prasauni","Thori"],"Metropolitan City":["Birgunj"]},"Parbat":{"Municipality":["Kushma","Phalebas"],"Rural Municipality":["Bihadi","Jaljala","Mahashila","Modi","Painyu"]},"Pyuthan":{"Municipality":["Pyuthan","Sworgadwary"],"Rural Municipality":["Ayirabati","Gaumukhi","Jhimruk","Mallarani","Mandavi","Naubahini","Sarumarani"]},"Ramechhap":{"Municipality":["Manthali","Ramechhap"],"Rural Municipality":["Doramba","Gokulganga","Khadadevi","Likhu","Sunapati","Umakunda"]},"Rasuwa":{"Rural Municipality":["Gosaikunda","Kalika","Naukunda","Parbatikunda","Uttargaya"]},"Rautahat":{"Municipality":["Baudhimai","Brindaban","Chandrapur","Devahi Gonahi","Gadhimai","Garuda","Gaur","Gujara","Ishanath","Katahariya","Madav Narayan","Maulapur","Paroha","Phatuwa Bijayapur","Rajdevi","Rajpur"],"Rural Municipality":["Durga Bhagawati","Yamunamai"]},"Rolpa":{"Municipality":["Rolpa"],"Rural Municipality":["Duikholi","Lungri","Madi","Runtigadi","Sukidaha","Sunchhahari","Suwarnabati","Thawang","Tribeni"]},"Rukum (East)":{"Rural Municipality":["Bhume","Putha Uttarganga","Sisne"]},"Rukum (West)":{"Municipality":["Aathbiskot","Chaurjahari","Musikot"],"Rural Municipality":["Banfikot","Sani Bheri","Tribeni"]},"Rupandehi":{"Municipality":["Devdaha","Lumbini Sanskritik","Sainamaina","Tilottama"],"Rural Municipality":["Gaidahawa","Kanchan","Kotahimai","Marchawari","Mayadevi","Omsatiya","Rohini","Sammarimai","Siyari","Sudhdhodhan"],"Sub-Metropolitan City":["Siddharthanagar","Butwal"]},"Salyan":{"Municipality":["Bagchaur","Bangad Kupinde","Sharada"],"Rural Municipality":["Chhatreshwori","Darma","Dhorchaur","Kalimati","Kapurkot","Kumakhmalika","Tribeni"]},"Sankhuwasabha":{"Municipality":["Chainpur","Dharmadevi","Khandbari","Madi","Panchakhapan"],"Rural Municipality":["Bhotkhola","Chichila","Makalu","Sabhapokhari","Silichong"]},"Saptari":{"Municipality":["Bodebarsaien","Dakneshwori","Hanumannagar Kankalani","Kanchanrup","Khadak","Rajbiraj","Saptakoshi","Shambhunath","Surunga"],"Rural Municipality":["Agnisair Krishnasavaran","Belhi Chapena","Bishnupur","Chhinnamasta","Mahadeva","Rupani","Tilathi Koiladi","Tirahut","Walan Bihul"]},"Sarlahi":{"Municipality":["Bagmati","Balara","Barahathawa","Godaita","Haripur","Haripurwa","Hariwan","Ishworpur","Kabilasi","Lalbandi","Malangawa"],"Rural Municipality":["Basbariya","Bishnu","Brahmapuri","Chakraghatta","Chandranagar","Dhankaul","Kaudena","Parsa","Ramnagar"]},"Sindhuli":{"Municipality":["Dudhouli","Kamalamai"],"Rural Municipality":["Ghanglekh","Golanjor","Hariharpurgadhi","Marin","Phikkal","Sunkoshi","Tinpatan"]},"Sindhupalchok":{"Municipality":["Barhabise","Chautara Sangachokgadhi","Melamchi"],"Rural Municipality":["Balefi","Bhotekoshi","Helambu","Indrawati","Jugal","Lisankhu Pakhar","Panchpokhari Thangpal","Sunkoshi","Tripurasundari"]},"Siraha":{"Municipality":["Dhangadhimai","Golbazar","Kalyanpur","Karjanha","Lahan","Mirchaiya","Siraha","Sukhipur"],"Rural Municipality":["Arnama","Aurahi","Bariyarpatti","Bhagawanpur","Bishnupur","Laxmipur patari","Naraha","Navarajpur","Sakhuwanankarkatti"]},"Solukhumbu":{"Municipality":["Solududhakunda"],"Rural Municipality":["Dudhkaushika","Dudhkoshi","Khumbu Pasanglahmu","Likhupike","Mahakulung","Nechasalyan","Sotang"]},"Sunsari":{"Municipality":["Barah","Duhabi","Inarwa","Ramdhuni"],"Rural Municipality":["Barju","Bhokraha","Dewanganj","Gadhi","Harinagara","Koshi"],"Sub-Metropolitan City":["Dharan","Itahari"]},"Surkhet":{"Municipality":["Bheriganga","Gurbhakot","Lekbesi","Panchpuri"],"Rural Municipality":["Barahtal","Chaukune","Chingad","Simta"],"Sub-Metropolitan City":["Birendranagar"]},"Syangja":{"Municipality":["Bhirkot","Chapakot","Galyang","Putalibazar","Waling"],"Rural Municipality":["Aandhikhola","Arjunchaupari","Biruwa","Harinas","Kaligandagi","Phedikhola"]},"Tanahun":{"Municipality":["Bhanu","Bhimad","Byas","Shuklagandaki"],"Rural Municipality":["Anbukhaireni","Bandipur","Devghat","Ghiring","Myagde","Rhishing"]},"Taplejung":{"Municipality":["Phungling"],"Rural Municipality":["Aathrai Tribeni","Maiwakhola","Meringden","Mikwakhola","Phaktanglung","Sidingba","Sirijangha","Yangwarak"]},"Terhathum":{"Municipality":["Laligurans","Myanglung"],"Rural Municipality":["Aathrai","Chhathar","Menchayam","Phedap"]},"Udayapur":{"Municipality":["Belaka","Chaudandigadhi","Katari","Triyuga"],"Rural Municipality":["Rautamai","Sunkoshi","Tapli","Udayapurgadhi"]}};
+
+function populateProvinceSelect(sel, includeAll){
+  PROVINCES.forEach(p=>{
+    const opt = document.createElement('option');
+    opt.value = p.name; opt.textContent = p.name;
+    sel.appendChild(opt);
+  });
+}
+const donorProvince = document.getElementById('donorProvince');
+const donorDistrict = document.getElementById('donorDistrict');
+const filterProvince = document.getElementById('filterProvince');
+populateProvinceSelect(donorProvince);
+populateProvinceSelect(filterProvince);
+
+donorProvince.addEventListener('change', ()=>{
+  const prov = PROVINCES.find(p=>p.name === donorProvince.value);
+  donorDistrict.innerHTML = '';
+  if(!prov){
+    donorDistrict.innerHTML = '<option value="">Select province first</option>';
+    donorDistrict.disabled = true;
+    return;
+  }
+  donorDistrict.disabled = false;
+  const first = document.createElement('option');
+  first.value = ''; first.textContent = 'Select district';
+  donorDistrict.appendChild(first);
+  prov.districts.forEach(d=>{
+    const opt = document.createElement('option');
+    opt.value = d; opt.textContent = d;
+    donorDistrict.appendChild(opt);
+  });
+});
+
+// ================= DONOR DATA =================
+const STORAGE_KEY = 'bdn_donors';
+
+const SAMPLE_DONORS = [
+  {name:'Sujata Rai', phone:'9800000001', blood:'O+', province:'Koshi Province', district:'Sunsari', localType:'Sub-Metropolitan City', localName:'Itahari', ward:'5', sample:true},
+  {name:'Bikash Thapa', phone:'9800000002', blood:'B+', province:'Bagmati Province', district:'Kathmandu', localType:'Metropolitan City', localName:'Kathmandu', ward:'10', sample:true},
+  {name:'Anita Gurung', phone:'9800000003', blood:'A−', province:'Gandaki Province', district:'Kaski', localType:'Metropolitan City', localName:'Pokhara', ward:'8', sample:true},
+  {name:'Rajendra Yadav', phone:'9800000004', blood:'AB+', province:'Madhesh Province', district:'Dhanusa', localType:'Sub-Metropolitan City', localName:'Janakpur', ward:'3', sample:true},
+  {name:'Manisha Chaudhary', phone:'9800000005', blood:'O−', province:'Sudurpashchim Province', district:'Kailali', localType:'Sub-Metropolitan City', localName:'Dhangadhi', ward:'12', sample:true},
+  {name:'Prakash B.K.', phone:'9800000006', blood:'B−', province:'Lumbini Province', district:'Rupandehi', localType:'Sub-Metropolitan City', localName:'Siddharthanagar', ward:'6', sample:true},
+  {name:'Sarita Oli', phone:'9800000007', blood:'A+', province:'Karnali Province', district:'Surkhet', localType:'Sub-Metropolitan City', localName:'Birendranagar', ward:'2', sample:true},
+  {name:'Deepak Karki', phone:'9800000008', blood:'AB−', province:'Bagmati Province', district:'Lalitpur', localType:'Metropolitan City', localName:'Lalitpur', ward:'14', sample:true}
+];
+
+function getStoredDonors(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch(e){ return []; }
+}
+function saveStoredDonors(list){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+function getAllDonors(){
+  return [...getStoredDonors(), ...SAMPLE_DONORS];
+}
+
+function bloodFamilyColor(blood){
+  if(blood.startsWith('A') && !blood.startsWith('AB')) return 'var(--rose)';
+  if(blood.startsWith('B')) return 'var(--gold)';
+  if(blood.startsWith('AB')) return 'var(--maroon)';
+  return 'var(--slate)';
+}
+
+// ================= TAB SWITCHING =================
+const demoTabs = document.getElementById('demoTabs');
+const tabBtns = demoTabs.querySelectorAll('button');
+const viewRegister = document.getElementById('viewRegister');
+const viewBrowse = document.getElementById('viewBrowse');
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const view = btn.dataset.view;
+    tabBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    demoTabs.classList.toggle('browse', view === 'browse');
+    viewRegister.classList.toggle('active', view === 'register');
+    viewBrowse.classList.toggle('active', view === 'browse');
+    if(view === 'browse') renderDonorList();
+  });
+});
+
+// ================= REGISTER FORM =================
+const registerBtn = document.getElementById('registerBtn');
+const registerMsg = document.getElementById('registerMsg');
+
+registerBtn.addEventListener('click', ()=>{
+  const name = document.getElementById('donorName').value.trim();
+  const phone = document.getElementById('donorPhone').value.trim();
+  const blood = document.getElementById('donorBlood').value;
+  const province = donorProvince.value;
+  const district = donorDistrict.value;
+  const localType = document.getElementById('donorLocalType').value;
+  const localName = document.getElementById('donorLocalName').value.trim();
+  const ward = document.getElementById('donorWard').value.trim();
+
+  const phoneOk = /^9\d{9}$/.test(phone);
+
+  if(!name || !phoneOk || !blood || !province || !district || !localType || !localName){
+    registerMsg.textContent = !phoneOk && phone ? 'Please enter a valid 10-digit phone number starting with 9.' : 'Please fill in every field before registering.';
+    registerMsg.classList.remove('success');
+    registerMsg.classList.remove('show');
+    requestAnimationFrame(()=> registerMsg.classList.add('show'));
+    return;
+  }
+
+  const donors = getStoredDonors();
+  donors.push({name, phone, blood, province, district, localType, localName, ward, sample:false, registeredAt:new Date().toISOString()});
+  saveStoredDonors(donors);
+
+  registerMsg.textContent = `Thank you, ${name} — you're registered as a ${blood} donor in ${district}.`;
+  registerMsg.classList.add('success');
+  registerMsg.classList.remove('show');
+  requestAnimationFrame(()=> registerMsg.classList.add('show'));
+
+  ['donorName','donorPhone','donorLocalName','donorWard'].forEach(id=> document.getElementById(id).value = '');
+  document.getElementById('donorBlood').value = '';
+  document.getElementById('donorLocalType').value = '';
+});
+
+// ================= BROWSE / FILTER =================
+const donorList = document.getElementById('donorList');
+const emptyState = document.getElementById('emptyState');
+const resultsCount = document.getElementById('resultsCount');
+const filterBlood = document.getElementById('filterBlood');
+const resetFilters = document.getElementById('resetFilters');
+const clearMyData = document.getElementById('clearMyData');
+
+function renderDonorList(){
+  const provFilter = filterProvince.value;
+  const bloodFilter = filterBlood.value;
+  const all = getAllDonors();
+  const matched = all.filter(d=>{
+    return (!provFilter || d.province === provFilter) && (!bloodFilter || d.blood === bloodFilter);
+  });
+
+  donorList.innerHTML = '';
+  resultsCount.textContent = `Showing ${matched.length} of ${all.length} registered donors`;
+
+  if(matched.length === 0){
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  matched.forEach((d, i)=>{
+    const card = document.createElement('div');
+    card.className = 'donor-card';
+    card.style.animationDelay = `${Math.min(i * 0.05, 0.4)}s`;
+    card.innerHTML = `
+      <div class="donor-top">
+        <span class="donor-name">${escapeHtml(d.name)}</span>
+        <span class="blood-badge" style="color:${bloodFamilyColor(d.blood)}; border-color:${bloodFamilyColor(d.blood)};">${escapeHtml(d.blood)}</span>
+      </div>
+      <div class="donor-loc">${escapeHtml(d.localName)}${d.ward ? ', Ward ' + escapeHtml(d.ward) : ''}<br>${escapeHtml(d.district)}, ${escapeHtml(d.province)}</div>
+      <div class="donor-bottom">
+        <a class="donor-phone" href="tel:${escapeHtml(d.phone)}">${escapeHtml(d.phone)}</a>
+        ${d.sample ? '<span class="sample-tag">Sample</span>' : ''}
+      </div>
+    `;
+    donorList.appendChild(card);
+  });
+}
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+filterProvince.addEventListener('change', renderDonorList);
+filterBlood.addEventListener('change', renderDonorList);
+resetFilters.addEventListener('click', ()=>{
+  filterProvince.value = '';
+  filterBlood.value = '';
+  renderDonorList();
+});
+clearMyData.addEventListener('click', ()=>{
+  if(getStoredDonors().length === 0){
+    registerMsg.textContent = '';
+    renderDonorList();
+    return;
+  }
+  const confirmed = confirm('This removes only the donors you registered on this device. Sample donors will remain. Continue?');
+  if(confirmed){
+    saveStoredDonors([]);
+    renderDonorList();
+  }
+});
+
+renderDonorList();
+</script>
+
+</body>
+</html>
