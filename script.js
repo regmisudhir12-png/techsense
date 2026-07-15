@@ -240,3 +240,58 @@ clearMyData.addEventListener('click', ()=>{
 });
 
 renderDonorList();
+
+// Disable Right Click
+document.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+});
+
+// Disable Keyboard Shortcuts
+document.addEventListener("keydown", (e) => {
+    const key = e.key.toLowerCase();
+
+    // Ctrl+U (View Source)
+    if (e.ctrlKey && key === "u") {
+        e.preventDefault();
+    }
+
+    // Ctrl+Shift+I (Developer Tools)
+    if (e.ctrlKey && e.shiftKey && key === "i") {
+        e.preventDefault();
+    }
+
+    // Ctrl+Shift+J (Console)
+    if (e.ctrlKey && e.shiftKey && key === "j") {
+        e.preventDefault();
+    }
+
+    // Ctrl+Shift+C (Inspect Element)
+    if (e.ctrlKey && e.shiftKey && key === "c") {
+        e.preventDefault();
+    }
+
+    // Ctrl+S (Save Page)
+    if (e.ctrlKey && key === "s") {
+        e.preventDefault();
+    }
+
+    // Ctrl+P (Print)
+    if (e.ctrlKey && key === "p") {
+        e.preventDefault();
+    }
+
+    // F12 (Developer Tools)
+    if (e.key === "F12") {
+        e.preventDefault();
+    }
+
+    // Ctrl+Shift+K (Firefox Console)
+    if (e.ctrlKey && e.shiftKey && key === "k") {
+        e.preventDefault();
+    }
+
+    // Ctrl+Shift+E (Firefox Network Monitor)
+    if (e.ctrlKey && e.shiftKey && key === "e") {
+        e.preventDefault();
+    }
+});
